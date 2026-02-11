@@ -24,9 +24,9 @@
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font);font-size:var(--fs);transition:background .6s,color .6s}
 body{position:relative}
 
-/* Canvas backgrounds */
-#starCanvas,#particleCanvas,#dreamCanvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0;transition:opacity .8s}
-#starCanvas.active,#particleCanvas.active,#dreamCanvas.active{opacity:1}
+/* Canvas backgrounds - disabled by default for cleaner UI */
+#starCanvas,#particleCanvas,#dreamCanvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0;transition:opacity .8s;display:none}
+#starCanvas.active,#particleCanvas.active,#dreamCanvas.active{opacity:0;display:none}
 
 /* Floating celestial body */
 #celestial{position:fixed;top:18px;right:18px;width:42px;height:42px;border-radius:50%;cursor:pointer;z-index:200;transition:all .6s;filter:drop-shadow(0 0 12px rgba(255,255,200,.5))}
@@ -60,7 +60,7 @@ body{position:relative}
 .chapter-content p{margin-bottom:.8em}
 
 /* Random quote */
-.quote-box{margin:30px auto 20px;padding:16px 20px;max-width:600px;border-left:3px solid var(--accent);background:var(--bg);border-radius:0 8px 8px 0;font-style:italic;color:var(--dim);font-size:.85em;opacity:0;animation:fadeSlideIn .6s .4s forwards;border:1px solid rgba(128,128,128,.1)}
+.quote-box{margin:30px auto 20px;padding:14px 18px;max-width:600px;border-left:3px solid var(--accent);background:transparent;border-radius:0 6px 6px 0;font-style:italic;color:var(--dim);font-size:.82em;opacity:.6;animation:fadeSlideIn .6s .4s forwards;border:none}
 
 /* Page info */
 .page-info{text-align:center;color:var(--dim);font-size:.78em;margin-top:20px;padding-bottom:10px}
@@ -122,10 +122,10 @@ body{position:relative}
 .dream-petal{position:fixed;pointer-events:none;z-index:2;opacity:0}
 .dream-orb{position:fixed;border-radius:50%;pointer-events:none;z-index:1;filter:blur(30px);opacity:0}
 .dream-mote{position:fixed;width:3px;height:3px;border-radius:50%;background:#fff;pointer-events:none;z-index:2;opacity:0}
-.side-glow{position:fixed;top:0;bottom:0;width:80px;pointer-events:none;z-index:1;opacity:0;transition:opacity .8s}
+.side-glow{position:fixed;top:0;bottom:0;width:80px;pointer-events:none;z-index:1;opacity:0;transition:opacity .8s;display:none}
 .side-glow.left{left:0;background:linear-gradient(to right,rgba(142,68,173,.08),transparent)}
 .side-glow.right{right:0;background:linear-gradient(to left,rgba(155,89,182,.08),transparent)}
-[data-theme="dream"] .side-glow{opacity:1}
+[data-theme="dream"] .side-glow{opacity:0;display:none}
 
 /* Shooting star */
 .shooting-star{position:fixed;pointer-events:none;z-index:2;width:80px;height:2px;background:linear-gradient(to right,rgba(255,255,255,0),rgba(255,255,255,.8));border-radius:1px;opacity:0}
