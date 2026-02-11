@@ -264,6 +264,12 @@ class Handler(BaseHTTPRequestHandler):
                 pass
             return
 
+        # favicon.ico
+        if path == "/favicon.ico":
+            self.send_response(204)
+            self.end_headers()
+            return
+
         # 静态文件: /sw.js, /manifest.json, /icons/*, /web/*
         if path == "/sw.js":
             return self._serve_file(BASE_DIR / "web" / "sw.js")
