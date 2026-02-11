@@ -544,11 +544,11 @@ function openCleanModal(e, id) {
   e.stopPropagation();
   currentCleanBookId = id;
   document.getElementById('inputWatermarks').value = '';
-  document.getElementById('cleanModal').style.display = 'flex';
+  document.getElementById('cleanModal').classList.add('active');
 }
 
 function closeCleanModal() {
-  document.getElementById('cleanModal').style.display = 'none';
+  document.getElementById('cleanModal').classList.remove('active');
   currentCleanBookId = null;
 }
 

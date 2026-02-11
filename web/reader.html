@@ -392,9 +392,11 @@ async function goChapter(i) {
       const limit = 15;
       const res = await fetch(`/api/books/${bookId}/chapters?start=${start}&limit=${limit}`);
       const data = await res.json();
-      data.forEach(ch => {
-        if (chapters[ch.index]) {
-          chapters[ch.index].content = ch.content;
+      // Merge by array index
+      data.forEach((ch, idx) => {
+        const targetIndex = start + idx;
+        if (chapters[targetIndex]) {
+          chapters[targetIndex].content = ch.content;
         }
       });
     } catch (err) {
@@ -670,10 +672,11 @@ Promise.all([
   return fetch(`/api/books/${bookId}/chapters?start=${start}&limit=${limit}`)
     .then(r => r.json())
     .then(data => {
-      // Merge loaded content
-      data.forEach(ch => {
-        if (chapters[ch.index]) {
-          chapters[ch.index].content = ch.content;
+      // Merge loaded content by array index
+      data.forEach((ch, idx) => {
+        const targetIndex = start + idx;
+        if (chapters[targetIndex]) {
+          chapters[targetIndex].content = ch.content;
         }
       });
       init();

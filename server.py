@@ -218,7 +218,7 @@ class Handler(BaseHTTPRequestHandler):
             if not cp.exists():
                 return self.send_error(404)
             chapters = json.loads(cp.read_text("utf-8"))
-            meta = [{"index": ch["index"], "title": ch["title"]} for ch in chapters]
+            meta = [{"index": i, "id": ch.get("id", i+1), "title": ch["title"]} for i, ch in enumerate(chapters)]
             return self._json_resp(meta)
 
         # API: 章节列表 (Gzip + ETag)
