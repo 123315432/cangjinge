@@ -210,24 +210,54 @@ class Handler(BaseHTTPRequestHandler):
                 b["progress"] = prog if prog else None
             return self._json_resp(books)
 
+        # API: 章节元数据（仅标题，快速加载）
+        m = re.match(r"^/api/books/([^/]+)/chapters/meta$", path)
+        if m:
+            bid = m.group(1)
+            cp = _chapters_path(bid)
+            if not cp.exists():
+                return self.send_error(404)
+            chapters = json.loads(cp.read_text("utf-8"))
+            meta = [{"index": ch["index"], "title": ch["title"]} for ch in chapters]
+            return self._json_resp(meta)
+
         # API: 章节列表 (Gzip + ETag)
         m = re.match(r"^/api/books/([^/]+)/chapters$", path)
         if m:
             bid = m.group(1)
-            result = _get_chapters_gz(bid)
-            if not result:
+            cp = _chapters_path(bid)
+            if not cp.exists():
                 return self.send_error(404)
-            gz, etag = result
+
+            # 解析查询参数
+            from urllib.parse import parse_qs
+            query = parse_qs(urlparse(self.path).query)
+            start = int(query.get('start', [0])[0])
+            limit = int(query.get('limit', [-1])[0])
+
+            # 读取章节数据
+            chapters = json.loads(cp.read_text("utf-8"))
+
+            # 切片处理
+            if limit > 0:
+                chapters = chapters[start:start + limit]
+
+            # 压缩并返回
+            raw = json.dumps(chapters, ensure_ascii=False).encode()
+            gz = gzip.compress(raw, compresslevel=6)
+            etag = hashlib.md5(raw).hexdigest()
+
             if self.headers.get("If-None-Match") == etag:
                 self.send_response(304)
                 self.end_headers()
                 return
+
             self.send_response(200)
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.send_header("Content-Encoding", "gzip")
             self.send_header("Content-Length", len(gz))
             self.send_header("ETag", etag)
-            self.send_header("Cache-Control", "no-cache")
+            self.send_header("Cache-Control", "public, max-age=3600")
             self.end_headers()
             self.wfile.write(gz)
             return

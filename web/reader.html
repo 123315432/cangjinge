@@ -378,10 +378,32 @@ function buildCatalog() {
   ).join('');
 }
 
-function goChapter(i) {
+async function goChapter(i) {
   if (i < 0 || i >= chapters.length) return;
   currentIndex = i;
   closePanels();
+
+  // Check if content is loaded
+  if (!chapters[i].content) {
+    chContent.innerHTML = '<p style="text-align:center;color:#888">加载中...</p>';
+    try {
+      // Load this chapter and nearby chapters
+      const start = Math.max(0, i - 5);
+      const limit = 15;
+      const res = await fetch(`/api/books/${bookId}/chapters?start=${start}&limit=${limit}`);
+      const data = await res.json();
+      data.forEach(ch => {
+        if (chapters[ch.index]) {
+          chapters[ch.index].content = ch.content;
+        }
+      });
+    } catch (err) {
+      chContent.innerHTML = '<p style="text-align:center;color:#e74c3c">加载失败，请重试</p>';
+      console.error('Failed to load chapter:', err);
+      return;
+    }
+  }
+
   renderChapter();
 }
 function prevChapter() { if (currentIndex > 0) goChapter(currentIndex - 1); }
@@ -633,17 +655,33 @@ initParticles(); drawParticles();
 spawnShootingStar();
 initSSE();
 
-// Fetch chapters from API
-fetch(`/api/books/${bookId}/chapters`)
-  .then(r => r.json())
-  .then(data => {
-    chapters = data;
-    init();
-  })
-  .catch(err => {
-    loading.innerHTML = '<span style="color:#e74c3c">加载失败，请刷新重试</span>';
-    console.error('Failed to load chapters:', err);
-  });
+// Fetch chapters metadata first (fast), then load content on demand
+Promise.all([
+  fetch(`/api/books/${bookId}/chapters/meta`).then(r => r.json()),
+  fetch(`/api/books/${bookId}/progress`).then(r => r.json())
+]).then(([meta, prog]) => {
+  // Store metadata
+  chapters = meta.map(m => ({ ...m, content: null }));
+  currentIndex = prog.chapter || 0;
+
+  // Load initial chapters (current + nearby)
+  const start = Math.max(0, currentIndex - 10);
+  const limit = 30;
+  return fetch(`/api/books/${bookId}/chapters?start=${start}&limit=${limit}`)
+    .then(r => r.json())
+    .then(data => {
+      // Merge loaded content
+      data.forEach(ch => {
+        if (chapters[ch.index]) {
+          chapters[ch.index].content = ch.content;
+        }
+      });
+      init();
+    });
+}).catch(err => {
+  loading.innerHTML = '<span style="color:#e74c3c">加载失败，请刷新重试</span>';
+  console.error('Failed to load chapters:', err);
+});
 </script>
 </body>
 </html>
