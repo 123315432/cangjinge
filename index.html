@@ -11,115 +11,90 @@
 <title>藏经阁</title>
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-@font-face {
-  font-family: 'LXGW WenKai';
-  src: local('LXGW WenKai'), local('LXGWWenKai-Regular');
-}
-
+@font-face { font-family: 'LXGW WenKai'; src: local('LXGW WenKai'), local('LXGWWenKai-Regular'); }
 :root {
-  --bg: #0d1117;
-  --text: #e6edf3;
-  --accent: #79c0ff;
-  --dim: #5a6a7a;
-  --card-bg: rgba(22, 27, 34, 0.85);
-  --card-border: rgba(121, 192, 255, 0.12);
-  --card-hover-border: rgba(121, 192, 255, 0.35);
+  --bg: #0d1117; --text: #e6edf3; --accent: #79c0ff; --dim: #5a6a7a;
+  --card-bg: rgba(22, 27, 34, 0.85); --card-border: rgba(121, 192, 255, 0.12);
+  --card-hover-border: rgba(121, 192, 255, 0.35); --modal-bg: rgba(13, 17, 23, 0.95);
+  --input-bg: rgba(30, 37, 46, 0.9); --input-border: rgba(121, 192, 255, 0.2);
+  --btn-bg: rgba(121, 192, 255, 0.15); --danger: #f47067; --success: #56d364;
 }
-
-html, body {
-  width: 100%; height: 100%;
-  font-family: 'LXGW WenKai', 'Noto Serif SC', 'SimSun', serif;
-  background: var(--bg);
-  color: var(--text);
-  overflow-x: hidden;
-}
-
-canvas#starfield {
-  position: fixed; top: 0; left: 0;
-  width: 100%; height: 100%;
-  z-index: 0; pointer-events: none;
-}
-
-.app {
-  position: relative; z-index: 1;
-  min-height: 100vh;
-  padding: 2rem 1.5rem 4rem;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-.app-title {
-  text-align: center;
-  font-size: 2.6rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  margin-bottom: 2.5rem;
-  color: var(--accent);
-  text-shadow: 0 0 20px rgba(121, 192, 255, 0.5), 0 0 60px rgba(121, 192, 255, 0.2);
-  animation: titleGlow 3s ease-in-out infinite alternate;
-  user-select: none;
-}
-
-@keyframes titleGlow {
-  from { text-shadow: 0 0 20px rgba(121,192,255,0.5), 0 0 60px rgba(121,192,255,0.15); }
-  to   { text-shadow: 0 0 30px rgba(121,192,255,0.7), 0 0 80px rgba(121,192,255,0.3); }
-}
-
-.book-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.2rem;
-  justify-items: center;
-}
-
-.book-card {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 12px;
-  padding: 1.3rem 1.4rem;
-  cursor: pointer;
-  transition: all 0.3s;
-  position: relative;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  width: 350px;
-}
-.book-card:hover {
-  border-color: var(--card-hover-border);
-  box-shadow: 0 0 24px rgba(121,192,255,0.08);
-  transform: translateY(-2px);
-}
-
-.book-card .book-name { font-size: 1.2rem; font-weight: 600; color: var(--text); margin-bottom: 0.5rem; line-height: 1.4; }
-.book-card .book-author { font-size: 0.88rem; color: var(--dim); margin-bottom: 0.7rem; }
-.book-card .book-meta { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
-.book-card .book-progress { font-size: 0.85rem; color: var(--accent); opacity: 0.85; }
-.book-card .book-chapters { font-size: 0.82rem; color: var(--dim); }
-
-.progress-bar-wrap { width: 100%; height: 4px; background: rgba(121,192,255,0.1); border-radius: 2px; margin-top: 0.8rem; overflow: hidden; }
-.progress-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.4s; }
-
-.empty-state { text-align: center; padding: 4rem 1rem; color: var(--dim); font-size: 1.05rem; }
-
-@media (max-width: 700px) {
-  .app { padding: 1.2rem 1rem 3rem; }
-  .app-title { font-size: 2rem; margin-bottom: 1.8rem; }
-  .book-grid { grid-template-columns: 1fr; gap: 1rem; }
-}
-@media (min-width: 1000px) {
-  .book-grid { grid-template-columns: repeat(3, 1fr); }
-}
+html, body { width:100%; height:100%; font-family:'LXGW WenKai','Noto Serif SC','SimSun',serif; background:var(--bg); color:var(--text); overflow-x:hidden; }
+canvas#starfield { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+.app { position:relative; z-index:1; min-height:100vh; padding:2rem 1.5rem 4rem; max-width:1100px; margin:0 auto; }
+.app-title { text-align:center; font-size:2.6rem; font-weight:700; letter-spacing:0.15em; margin-bottom:2.5rem; color:var(--accent); text-shadow:0 0 20px rgba(121,192,255,0.5),0 0 60px rgba(121,192,255,0.2); animation:titleGlow 3s ease-in-out infinite alternate; user-select:none; }
+@keyframes titleGlow { from{text-shadow:0 0 20px rgba(121,192,255,0.5),0 0 60px rgba(121,192,255,0.15)} to{text-shadow:0 0 30px rgba(121,192,255,0.7),0 0 80px rgba(121,192,255,0.3)} }
+.toolbar { display:flex; justify-content:flex-end; margin-bottom:1.5rem; }
+.btn { font-family:inherit; font-size:0.95rem; padding:0.55rem 1.3rem; border:1px solid var(--card-border); border-radius:8px; background:var(--btn-bg); color:var(--accent); cursor:pointer; transition:all 0.25s; user-select:none; }
+.btn:hover { background:rgba(121,192,255,0.25); border-color:var(--card-hover-border); }
+.btn:active { transform:scale(0.97); }
+.btn-sm { font-size:0.78rem; padding:0.3rem 0.7rem; border-radius:6px; }
+.btn-danger { color:var(--danger); border-color:rgba(244,112,103,0.2); background:rgba(244,112,103,0.08); }
+.btn-danger:hover { background:rgba(244,112,103,0.18); border-color:rgba(244,112,103,0.4); }
+.book-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:1.2rem; justify-items:center; }
+.book-card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:12px; padding:1.3rem 1.4rem; cursor:pointer; transition:all 0.3s; position:relative; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); width:350px; }
+.book-card:hover { border-color:var(--card-hover-border); box-shadow:0 0 24px rgba(121,192,255,0.08); transform:translateY(-2px); }
+.book-card .book-name { font-size:1.2rem; font-weight:600; color:var(--text); margin-bottom:0.5rem; line-height:1.4; }
+.book-card .book-author { font-size:0.88rem; color:var(--dim); margin-bottom:0.7rem; }
+.book-card .book-meta { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; }
+.book-card .book-progress { font-size:0.85rem; color:var(--accent); opacity:0.85; }
+.book-card .book-chapters { font-size:0.82rem; color:var(--dim); }
+.book-card .card-actions { display:flex; gap:0.5rem; margin-top:0.9rem; }
+.progress-bar-wrap { width:100%; height:4px; background:rgba(121,192,255,0.1); border-radius:2px; margin-top:0.8rem; overflow:hidden; }
+.progress-bar-fill { height:100%; background:var(--accent); border-radius:2px; transition:width 0.4s; }
+.empty-state { text-align:center; padding:4rem 1rem; color:var(--dim); font-size:1.05rem; }
+.modal-overlay { position:fixed; inset:0; z-index:100; background:rgba(0,0,0,0.6); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.modal-overlay.active { opacity:1; pointer-events:auto; }
+.modal { background:var(--modal-bg); border:1px solid var(--card-border); border-radius:14px; padding:2rem 2rem 1.6rem; width:92%; max-width:440px; transform:translateY(20px) scale(0.97); transition:transform 0.3s; }
+.modal-overlay.active .modal { transform:translateY(0) scale(1); }
+.modal-title { font-size:1.3rem; font-weight:600; color:var(--accent); margin-bottom:1.5rem; text-align:center; }
+.form-group { margin-bottom:1rem; }
+.form-group label { display:block; font-size:0.88rem; color:var(--dim); margin-bottom:0.35rem; }
+.form-group input, .form-group textarea { width:100%; font-family:inherit; font-size:0.95rem; padding:0.6rem 0.85rem; background:var(--input-bg); border:1px solid var(--input-border); border-radius:8px; color:var(--text); outline:none; transition:border-color 0.25s; }
+.form-group input:focus, .form-group textarea:focus { border-color:var(--accent); }
+.form-group input::placeholder, .form-group textarea::placeholder { color:var(--dim); opacity:0.6; }
+.form-group textarea { min-height:120px; resize:vertical; }
+.modal-actions { display:flex; gap:0.8rem; margin-top:1.4rem; }
+.modal-actions .btn { flex:1; text-align:center; }
+.btn-primary { background:rgba(121,192,255,0.2); color:var(--accent); font-weight:600; }
+.btn-primary:hover { background:rgba(121,192,255,0.32); }
+.btn-ghost { background:transparent; color:var(--dim); border-color:rgba(90,106,122,0.3); }
+.btn-ghost:hover { background:rgba(90,106,122,0.12); }
+.toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(20px); z-index:200; padding:0.7rem 1.5rem; border-radius:8px; font-size:0.9rem; color:var(--text); background:rgba(30,37,46,0.95); border:1px solid var(--card-border); backdrop-filter:blur(6px); opacity:0; transition:all 0.3s; pointer-events:none; white-space:nowrap; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.toast.success { border-color:rgba(86,211,100,0.4); }
+.toast.error { border-color:rgba(244,112,103,0.4); }
+@media (max-width:700px) { .app{padding:1.2rem 1rem 3rem} .app-title{font-size:2rem;margin-bottom:1.8rem} .book-grid{grid-template-columns:1fr;gap:1rem} .book-card{width:100%} .modal{padding:1.5rem 1.3rem 1.3rem} }
+@media (min-width:1000px) { .book-grid{grid-template-columns:repeat(3,1fr)} }
 </style>
 </head>
 <body>
 <canvas id="starfield"></canvas>
-
 <div class="app">
   <h1 class="app-title">藏经阁</h1>
+  <div class="toolbar">
+    <button class="btn" onclick="showToast('请在电脑端添加新书后重新部署','error')">添加新书</button>
+  </div>
   <div id="bookGrid" class="book-grid"></div>
   <div id="emptyState" class="empty-state" style="display:none;">书架空空如也</div>
 </div>
+
+<!-- Clean Watermark Modal -->
+<div class="modal-overlay" id="cleanModal" onclick="if(event.target.id==='cleanModal')closeCleanModal()">
+  <div class="modal">
+    <div class="modal-title">清除水印</div>
+    <div class="form-group">
+      <label>自定义水印（每行一个）</label>
+      <textarea id="inputWatermarks" placeholder="输入要删除的水印文字，每行一个"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeCleanModal()">取消</button>
+      <button class="btn btn-primary" id="btnClean" onclick="submitClean()">清除</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
 /* Starfield */
@@ -151,8 +126,18 @@ canvas#starfield {
 
 /* State */
 let books = [];
+let currentCleanBookId = null;
 
 function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+/* Toast */
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + (type || '');
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => { t.className = 'toast'; }, 2600);
+}
 
 /* 从 localStorage 读取阅读进度 */
 function getProgress(bookId) {
@@ -160,6 +145,36 @@ function getProgress(bookId) {
     const s = JSON.parse(localStorage.getItem(`reader_${bookId}`));
     return s ? { chapter: s.chapterIndex || 0 } : null;
   } catch(e) { return null; }
+}
+
+/* 获取水印列表 */
+function getWatermarks(bookId) {
+  try {
+    return JSON.parse(localStorage.getItem(`watermarks_${bookId}`)) || [];
+  } catch(e) { return []; }
+}
+
+/* Clean Modal */
+function openCleanModal(e, id) {
+  e.stopPropagation();
+  currentCleanBookId = id;
+  document.getElementById('inputWatermarks').value = getWatermarks(id).join('\n');
+  document.getElementById('cleanModal').classList.add('active');
+}
+function closeCleanModal() {
+  document.getElementById('cleanModal').classList.remove('active');
+  currentCleanBookId = null;
+}
+
+function submitClean() {
+  if (!currentCleanBookId) return;
+  const textarea = document.getElementById('inputWatermarks');
+  const watermarks = textarea.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  if (watermarks.length === 0) { showToast('请输入至少一个水印', 'error'); return; }
+  // 保存到 localStorage，阅读时自动过滤
+  localStorage.setItem(`watermarks_${currentCleanBookId}`, JSON.stringify(watermarks));
+  showToast('水印规则已保存，阅读时自动过滤', 'success');
+  closeCleanModal();
 }
 
 async function loadBooks() {
@@ -197,13 +212,16 @@ function renderBooks() {
         <div class="progress-bar-wrap">
           <div class="progress-bar-fill" style="width:${pct}%"></div>
         </div>
+        <div class="card-actions">
+          <button class="btn btn-sm btn-danger" onclick="openCleanModal(event, '${b.id}')">清除水印</button>
+        </div>
       </div>`;
   }).join('');
 }
 
-function goRead(id) {
-  window.location.href = '/read/' + id;
-}
+function goRead(id) { window.location.href = '/read/' + id; }
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCleanModal(); });
 
 loadBooks();
 </script>
