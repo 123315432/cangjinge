@@ -1,0 +1,18 @@
+[
+  {
+    "id": "190937",
+    "name": "没钱修什么仙",
+    "author": "佚名",
+    "source": "apibi.cc",
+    "book_id": 190937,
+    "chapter_count": 900,
+    "chapter_start": 1,
+    "chapter_end": 900,
+    "progress": {
+      "chapter": 297,
+      "ts": 1770819461461
+    },
+    "chunk_size": 50,
+    "total_chunks": 18
+  }
+]

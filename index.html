@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d1117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.json">
+<title>藏经阁</title>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+@font-face {
+  font-family: 'LXGW WenKai';
+  src: local('LXGW WenKai'), local('LXGWWenKai-Regular');
+}
+
+:root {
+  --bg: #0d1117;
+  --text: #e6edf3;
+  --accent: #79c0ff;
+  --dim: #5a6a7a;
+  --card-bg: rgba(22, 27, 34, 0.85);
+  --card-border: rgba(121, 192, 255, 0.12);
+  --card-hover-border: rgba(121, 192, 255, 0.35);
+}
+
+html, body {
+  width: 100%; height: 100%;
+  font-family: 'LXGW WenKai', 'Noto Serif SC', 'SimSun', serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+canvas#starfield {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0; pointer-events: none;
+}
+
+.app {
+  position: relative; z-index: 1;
+  min-height: 100vh;
+  padding: 2rem 1.5rem 4rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.app-title {
+  text-align: center;
+  font-size: 2.6rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  margin-bottom: 2.5rem;
+  color: var(--accent);
+  text-shadow: 0 0 20px rgba(121, 192, 255, 0.5), 0 0 60px rgba(121, 192, 255, 0.2);
+  animation: titleGlow 3s ease-in-out infinite alternate;
+  user-select: none;
+}
+
+@keyframes titleGlow {
+  from { text-shadow: 0 0 20px rgba(121,192,255,0.5), 0 0 60px rgba(121,192,255,0.15); }
+  to   { text-shadow: 0 0 30px rgba(121,192,255,0.7), 0 0 80px rgba(121,192,255,0.3); }
+}
+
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.2rem;
+  justify-items: center;
+}
+
+.book-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 1.3rem 1.4rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  width: 350px;
+}
+.book-card:hover {
+  border-color: var(--card-hover-border);
+  box-shadow: 0 0 24px rgba(121,192,255,0.08);
+  transform: translateY(-2px);
+}
+
+.book-card .book-name { font-size: 1.2rem; font-weight: 600; color: var(--text); margin-bottom: 0.5rem; line-height: 1.4; }
+.book-card .book-author { font-size: 0.88rem; color: var(--dim); margin-bottom: 0.7rem; }
+.book-card .book-meta { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+.book-card .book-progress { font-size: 0.85rem; color: var(--accent); opacity: 0.85; }
+.book-card .book-chapters { font-size: 0.82rem; color: var(--dim); }
+
+.progress-bar-wrap { width: 100%; height: 4px; background: rgba(121,192,255,0.1); border-radius: 2px; margin-top: 0.8rem; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.4s; }
+
+.empty-state { text-align: center; padding: 4rem 1rem; color: var(--dim); font-size: 1.05rem; }
+
+@media (max-width: 700px) {
+  .app { padding: 1.2rem 1rem 3rem; }
+  .app-title { font-size: 2rem; margin-bottom: 1.8rem; }
+  .book-grid { grid-template-columns: 1fr; gap: 1rem; }
+}
+@media (min-width: 1000px) {
+  .book-grid { grid-template-columns: repeat(3, 1fr); }
+}
+</style>
+</head>
+<body>
+<canvas id="starfield"></canvas>
+
+<div class="app">
+  <h1 class="app-title">藏经阁</h1>
+  <div id="bookGrid" class="book-grid"></div>
+  <div id="emptyState" class="empty-state" style="display:none;">书架空空如也</div>
+</div>
+
+<script>
+/* Starfield */
+(function initStarfield() {
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  const COUNT = 180;
+  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  function createStars() {
+    stars = [];
+    for (let i = 0; i < COUNT; i++) {
+      stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*1.4+0.3, a: Math.random(), da: (Math.random()-0.5)*0.008 });
+    }
+  }
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const s of stars) {
+      s.a += s.da;
+      if (s.a <= 0.1 || s.a >= 1) s.da = -s.da;
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(230,237,243,' + s.a.toFixed(2) + ')'; ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', () => { resize(); createStars(); });
+  resize(); createStars(); draw();
+})();
+
+/* State */
+let books = [];
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+/* 从 localStorage 读取阅读进度 */
+function getProgress(bookId) {
+  try {
+    const s = JSON.parse(localStorage.getItem(`reader_${bookId}`));
+    return s ? { chapter: s.chapterIndex || 0 } : null;
+  } catch(e) { return null; }
+}
+
+async function loadBooks() {
+  try {
+    const res = await fetch('/api/books.json');
+    if (!res.ok) throw new Error(res.statusText);
+    books = await res.json();
+    renderBooks();
+  } catch (e) {
+    console.error('加载书架失败:', e);
+    document.getElementById('emptyState').style.display = 'block';
+  }
+}
+
+function renderBooks() {
+  const grid = document.getElementById('bookGrid');
+  const empty = document.getElementById('emptyState');
+  if (!books || books.length === 0) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  grid.innerHTML = books.map(b => {
+    const total = b.chapter_count || 0;
+    const localProg = getProgress(b.id);
+    const prog = localProg || b.progress || {};
+    const read = prog.chapter != null ? prog.chapter + 1 : 0;
+    const pct = total > 0 ? Math.min(100, (read / total * 100)).toFixed(1) : 0;
+    const author = b.author || '未知作者';
+    return `
+      <div class="book-card" onclick="goRead('${b.id}')" title="点击阅读">
+        <div class="book-name">${esc(b.name || '未命名')}</div>
+        <div class="book-author">${esc(author)}</div>
+        <div class="book-meta">
+          <span class="book-progress">已读 ${read}/${total} 章</span>
+          <span class="book-chapters">共 ${total} 章</span>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" style="width:${pct}%"></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function goRead(id) {
+  window.location.href = '/read/' + id;
+}
+
+loadBooks();
+</script>
+</body>
+</html>
