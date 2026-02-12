@@ -24,12 +24,82 @@
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font);font-size:var(--fs);transition:background .6s,color .6s}
 body{position:relative}
 
-#celestial{position:fixed;top:18px;right:18px;width:42px;height:42px;border-radius:50%;cursor:pointer;z-index:200;transition:all .6s;filter:drop-shadow(0 0 12px rgba(255,255,200,.5))}
-#celestial.moon{background:radial-gradient(circle at 35% 35%,#fffbe6 0%,#ffe066 60%,#ffc800 100%);box-shadow:0 0 20px rgba(255,230,100,.6),0 0 60px rgba(255,200,50,.2)}
-#celestial.sun{background:radial-gradient(circle at 40% 40%,#fff8e1 0%,#ffcc02 50%,#ff9800 100%);box-shadow:0 0 30px rgba(255,160,0,.5),0 0 80px rgba(255,120,0,.2)}
-#celestial:hover{transform:scale(1.15)}
-#celestial::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(255,255,255,.15);animation:celestialPulse 3s infinite}
-@keyframes celestialPulse{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:.8;transform:scale(1.1)}}
+#stars{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;transition:opacity 1s ease}
+
+.moon{position:fixed;top:60px;right:40px;width:60px;height:60px;border-radius:50%;cursor:pointer;transition:all 1.2s cubic-bezier(.4,0,.2,1);background:radial-gradient(circle at 30% 30%,#fffde7,#ffd54f);box-shadow:0 0 40px 15px rgba(255,213,79,.3),0 0 80px 30px rgba(255,213,79,.1);z-index:200;opacity:.8;animation:moonFloat 8s ease-in-out infinite}
+@keyframes moonFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+.shooting-star{position:fixed;width:100px;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.8),transparent);z-index:2;opacity:0;pointer-events:none}
+
+/* Moonlight wash */
+.moonlight-wash{position:fixed;top:0;right:0;width:100%;height:100%;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 85% 10%,rgba(180,210,255,.18) 0%,rgba(160,190,240,.06) 40%,transparent 70%);opacity:1;transition:opacity 1s ease}
+
+/* Day mode */
+body.day-mode{background-color:#e8e2d6!important}
+body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none;background:linear-gradient(180deg,#d4dce8 0%,#e8e2d6 30%,#ede8df 100%);opacity:0;transition:opacity 2s ease}
+body.day-mode::after{opacity:1}
+.day-mode #stars{opacity:0}
+.day-mode .moon{background:radial-gradient(circle at 35% 35%,#fff7a0,#ffd502);box-shadow:0 0 50px 20px rgba(255,204,2,.5),0 0 100px 40px rgba(255,180,0,.2);width:70px;height:70px}
+.day-mode .moonlight-wash{opacity:0}
+.day-mode .shooting-star{display:none}
+
+/* Day clouds */
+.day-clouds{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none;opacity:0;transition:opacity 1s ease .3s}
+.day-mode .day-clouds{opacity:1}
+.cloud{position:absolute;background:white;border-radius:50px;opacity:.6;filter:blur(1px)}
+.cloud::before,.cloud::after{content:'';position:absolute;background:white;border-radius:50%}
+.cloud-1{width:120px;height:35px;top:8%;animation:cloudDrift1 35s linear infinite}
+.cloud-1::before{width:50px;height:50px;top:-25px;left:20px}
+.cloud-1::after{width:70px;height:55px;top:-30px;left:45px}
+.cloud-2{width:90px;height:28px;top:15%;animation:cloudDrift2 45s linear infinite;opacity:.4}
+.cloud-2::before{width:40px;height:40px;top:-20px;left:15px}
+.cloud-2::after{width:55px;height:45px;top:-25px;left:35px}
+.cloud-3{width:150px;height:40px;top:5%;animation:cloudDrift3 55s linear infinite;opacity:.35}
+.cloud-3::before{width:60px;height:55px;top:-28px;left:25px}
+.cloud-3::after{width:80px;height:60px;top:-32px;left:55px}
+@keyframes cloudDrift1{0%{left:-200px}100%{left:110%}}
+@keyframes cloudDrift2{0%{left:110%}100%{left:-200px}}
+@keyframes cloudDrift3{0%{left:-250px}100%{left:110%}}
+
+/* Sun rays */
+.sun-rays{position:fixed;top:30px;right:10px;width:140px;height:140px;z-index:0;pointer-events:none;opacity:0;transition:opacity 1s ease .2s}
+.day-mode .sun-rays{opacity:1;background:radial-gradient(circle,rgba(255,200,50,.25) 0%,rgba(255,180,0,.08) 40%,transparent 70%);animation:sunPulse 4s ease-in-out infinite}
+@keyframes sunPulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.15);opacity:1}}
+
+/* Theme overrides */
+[data-theme="sepia"] #stars,[data-theme="green"] #stars{opacity:0}
+[data-theme="sepia"] .moonlight-wash,[data-theme="green"] .moonlight-wash{opacity:0}
+[data-theme="sepia"] .moon,[data-theme="green"] .moon{background:radial-gradient(circle at 35% 35%,#fff7a0,#ffd502);box-shadow:0 0 50px 20px rgba(255,213,2,.4)}
+[data-theme="sepia"] .shooting-star,[data-theme="green"] .shooting-star{display:none}
+[data-theme="sepia"] .day-clouds,[data-theme="green"] .day-clouds{opacity:0}
+[data-theme="dark"] #stars,[data-theme="blue"] #stars{opacity:1}
+[data-theme="dark"] .moonlight-wash,[data-theme="blue"] .moonlight-wash{opacity:.6}
+[data-theme="dark"] .moon{background:radial-gradient(circle at 30% 30%,#e0e0e0,#9e9e9e);box-shadow:0 0 30px 10px rgba(200,200,200,.2)}
+[data-theme="blue"] .moon{background:radial-gradient(circle at 30% 30%,#b8d4f0,#7eb8da);box-shadow:0 0 30px 10px rgba(93,173,226,.3)}
+
+/* Dream theme */
+[data-theme="dream"]{--bg:#ede0f5;--text:#4a3558;--title:#7c5a9e;--dim:#a090b0;--accent:#9b72cf}
+body[data-theme="dream"]{background:linear-gradient(135deg,#e0c3fc,#f5c6ec,#c4b0ff,#fbc2eb,#d4c5f9,#f0d0e8)!important;background-size:400% 400%!important;animation:dreamBgDrift 25s ease-in-out infinite!important}
+body[data-theme="dream"]::after{opacity:0!important}
+@keyframes dreamBgDrift{0%{background-position:0% 50%}25%{background-position:50% 100%}50%{background-position:100% 50%}75%{background-position:50% 0%}100%{background-position:0% 50%}}
+[data-theme="dream"] #stars{opacity:0}
+[data-theme="dream"] .moonlight-wash{opacity:0}
+[data-theme="dream"] .shooting-star{display:none}
+[data-theme="dream"] .moon{background:radial-gradient(circle at 40% 40%,#fff,#eedcf8);box-shadow:0 0 40px 15px rgba(210,180,240,.25);opacity:.5;width:40px;height:40px}
+[data-theme="dream"] .day-clouds,.day-particles,.sun-rays{opacity:0}
+[data-theme="dream"] #readerWrap{background:rgba(255,255,255,.15);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:16px}
+[data-theme="dream"] .quote-box{background:rgba(155,114,207,.06);border-color:rgba(155,114,207,.15)}
+
+/* Dream layer */
+.dream-layer{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none;opacity:0;transition:opacity 2s ease;overflow:hidden}
+[data-theme="dream"] .dream-layer{opacity:1}
+.dream-orb{position:absolute;border-radius:50%;filter:blur(90px);will-change:transform;mix-blend-mode:soft-light;opacity:.7}
+.dream-orb-1{width:55vmax;height:55vmax;top:-15%;left:-10%;background:radial-gradient(circle,rgba(192,132,252,.35),transparent 65%);animation:orbCircle 45s ease-in-out infinite}
+.dream-orb-2{width:45vmax;height:45vmax;top:10%;right:-15%;background:radial-gradient(circle,rgba(244,114,182,.28),transparent 65%);animation:orbVertical 35s ease-in-out infinite}
+.dream-orb-3{width:50vmax;height:50vmax;bottom:-20%;left:15%;background:radial-gradient(circle,rgba(165,180,252,.25),transparent 65%);animation:orbHorizontal 40s ease-in-out infinite}
+@keyframes orbCircle{0%{transform:rotate(0deg) translate(5vw,0) rotate(0deg)}100%{transform:rotate(360deg) translate(5vw,0) rotate(-360deg)}}
+@keyframes orbVertical{0%,100%{transform:translateY(-8vh) scale(1)}50%{transform:translateY(8vh) scale(1.1)}}
+@keyframes orbHorizontal{0%,100%{transform:translateX(-6vw) scale(1.05)}50%{transform:translateX(6vw) scale(.95)}}
 
 #themeFlash{position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:0;transition:opacity .15s}
 #themeFlash.flash{opacity:1;transition:opacity 0s}
@@ -44,7 +114,8 @@ body{position:relative}
 .chapter-content{line-height:2;text-indent:2em;word-break:break-all;opacity:0;animation:fadeSlideIn .6s .25s forwards;font-size:1.05em;text-align:justify}
 .chapter-content p{margin-bottom:.8em}
 
-.quote-box{margin:30px auto 20px;padding:14px 18px;max-width:600px;border-left:3px solid var(--accent);background:transparent;border-radius:0 6px 6px 0;font-style:italic;color:var(--dim);font-size:.82em;opacity:.6;animation:fadeSlideIn .6s .4s forwards;border:none}
+.quote-box{text-align:center;padding:30px 20px;margin:40px 0;border:1px solid var(--dim);border-radius:8px;background:rgba(110,181,255,0.03)}
+.quote-text{font-size:0.95em;color:var(--title);font-style:italic;opacity:0.8}
 
 .page-info{text-align:center;color:var(--dim);font-size:.78em;margin-top:20px;padding-bottom:10px}
 
@@ -113,12 +184,26 @@ body{position:relative}
 
 <div id="loading"><span>加载中<span class="loader-dots"></span></span></div>
 <div id="themeFlash"></div>
-<div id="celestial" class="moon" title="切换主题"></div>
+
+<canvas id="stars"></canvas>
+<div class="moon" id="moonToggle" onclick="cycleTheme()" title="切换主题"></div>
+<div class="sun-rays"></div>
+<div class="moonlight-wash"></div>
+<div class="day-clouds">
+  <div class="cloud cloud-1"></div>
+  <div class="cloud cloud-2"></div>
+  <div class="cloud cloud-3"></div>
+</div>
+<div class="dream-layer" id="dreamLayer">
+  <div class="dream-orb dream-orb-1"></div>
+  <div class="dream-orb dream-orb-2"></div>
+  <div class="dream-orb dream-orb-3"></div>
+</div>
 
 <div id="readerWrap">
   <h1 class="chapter-title" id="chTitle"></h1>
   <div class="chapter-content" id="chContent"></div>
-  <div class="quote-box" id="quoteBox"></div>
+  <div class="quote-box"><div class="quote-text" id="quoteBox"></div></div>
   <div class="page-info" id="pageInfo"></div>
 </div>
 
@@ -218,9 +303,11 @@ const catList = $('catList');
 const overlay = $('overlay');
 const catalog = $('catalog');
 const settingsPanel = $('settings');
-const celestial = $('celestial');
 const themeFlash = $('themeFlash');
 const loading = $('loading');
+const starsCanvas = $('stars');
+const starsCtx = starsCanvas.getContext('2d');
+let stars = [];
 
 // ===== LocalStorage =====
 function loadSettings() {
@@ -237,6 +324,47 @@ function getWatermarks(bid) {
   catch(e) { return []; }
 }
 
+// ===== Stars =====
+function initStars() {
+  starsCanvas.width = window.innerWidth;
+  starsCanvas.height = window.innerHeight;
+  stars = [];
+  for (let i = 0; i < 150; i++) {
+    stars.push({ x: Math.random()*starsCanvas.width, y: Math.random()*starsCanvas.height, r: Math.random()*1.5+0.5, a: Math.random(), s: Math.random()*0.02+0.005 });
+  }
+}
+function drawStars() {
+  starsCtx.clearRect(0, 0, starsCanvas.width, starsCanvas.height);
+  stars.forEach(s => {
+    s.a += s.s; if (s.a > 1) s.a = 0;
+    starsCtx.beginPath();
+    starsCtx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    starsCtx.fillStyle = `rgba(255,255,255,${0.3+Math.sin(s.a*Math.PI)*0.7})`;
+    starsCtx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+
+// ===== Shooting Stars =====
+function shootingStar() {
+  if (!darkThemes.includes(settings.theme)) {
+    setTimeout(shootingStar, 5000+Math.random()*8000);
+    return;
+  }
+  const star = document.createElement('div');
+  star.className = 'shooting-star';
+  star.style.top = Math.random()*40+'%';
+  star.style.left = Math.random()*60+'%';
+  star.style.transform = `rotate(${Math.random()*30+15}deg)`;
+  document.body.appendChild(star);
+  star.animate([
+    {opacity:0, transform:`rotate(${Math.random()*30+15}deg) translateX(0)`},
+    {opacity:1, transform:`rotate(${Math.random()*30+15}deg) translateX(100px)`},
+    {opacity:0, transform:`rotate(${Math.random()*30+15}deg) translateX(300px)`}
+  ], {duration:1000, easing:'ease-out'}).onfinish = () => star.remove();
+  setTimeout(shootingStar, 5000+Math.random()*8000);
+}
+
 // ===== Theme =====
 function setTheme(t, flash=true) {
   if (flash && t !== settings.theme) {
@@ -247,8 +375,12 @@ function setTheme(t, flash=true) {
   }
   settings.theme = t;
   body.setAttribute('data-theme', t);
+  // Day mode class
+  body.classList.remove('day-mode');
+  if (t === 'day') body.classList.add('day-mode');
+  // Stars for dark themes
+  if (darkThemes.includes(t)) initStars();
   document.querySelectorAll('.theme-dot').forEach(d => d.classList.toggle('active', d.dataset.theme === t));
-  celestial.className = darkThemes.includes(t) ? 'moon' : 'sun';
   saveSettings();
 }
 function cycleTheme() {
@@ -404,7 +536,10 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'Escape') closePanels();
 });
 
-// ===== Touch swipe =====
+// ===== Resize =====
+window.addEventListener('resize', () => { initStars(); });
+
+// ===== Init =====
 let touchStartX = 0;
 wrap.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, {passive:true});
 wrap.addEventListener('touchend', e => {
@@ -413,9 +548,6 @@ wrap.addEventListener('touchend', e => {
     if (dx > 0) prevChapter(); else nextChapter();
   }
 }, {passive:true});
-
-// ===== Celestial click =====
-celestial.addEventListener('click', cycleTheme);
 
 // ===== Init =====
 function applySettings() {
@@ -440,6 +572,9 @@ function init() {
 // Boot
 loadSettings();
 applySettings();
+initStars();
+drawStars();
+shootingStar();
 
 // 加载章节元数据，然后加载当前章节所在的分块
 fetch(`/api/books/${bookId}/meta.json`)
