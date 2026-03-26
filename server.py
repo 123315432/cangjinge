@@ -73,6 +73,19 @@ def _init_progress():
                 _progress[d.name] = prog
 
 
+_chapters_parsed: dict[str, list] = {}  # book_id -> parsed chapters list
+
+def _get_chapters_parsed(book_id: str) -> list | None:
+    """返回解析后的章节列表，带缓存"""
+    if book_id in _chapters_parsed:
+        return _chapters_parsed[book_id]
+    cp = _chapters_path(book_id)
+    if not cp.exists():
+        return None
+    chapters = json.loads(cp.read_text("utf-8"))
+    _chapters_parsed[book_id] = chapters
+    return chapters
+
 def _get_chapters_gz(book_id: str) -> tuple[bytes, str] | None:
     """返回 (gzip_bytes, etag)，带缓存"""
     if book_id in _chapter_cache:
@@ -89,6 +102,7 @@ def _get_chapters_gz(book_id: str) -> tuple[bytes, str] | None:
 
 def _invalidate_cache(book_id: str):
     _chapter_cache.pop(book_id, None)
+    _chapters_parsed.pop(book_id, None)
 
 
 # --- SSE ---
@@ -185,7 +199,10 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", mime or "application/octet-stream")
         self.send_header("Content-Length", len(data))
-        self.send_header("Cache-Control", "public, max-age=3600")
+        if str(filepath).endswith(".html"):
+            self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+        else:
+            self.send_header("Cache-Control", "public, max-age=3600")
         self.end_headers()
         self.wfile.write(data)
 
@@ -214,10 +231,9 @@ class Handler(BaseHTTPRequestHandler):
         m = re.match(r"^/api/books/([^/]+)/chapters/meta$", path)
         if m:
             bid = m.group(1)
-            cp = _chapters_path(bid)
-            if not cp.exists():
+            chapters = _get_chapters_parsed(bid)
+            if chapters is None:
                 return self.send_error(404)
-            chapters = json.loads(cp.read_text("utf-8"))
             meta = [{"index": i, "id": ch.get("id", i+1), "title": ch["title"]} for i, ch in enumerate(chapters)]
             return self._json_resp(meta)
 
@@ -225,8 +241,8 @@ class Handler(BaseHTTPRequestHandler):
         m = re.match(r"^/api/books/([^/]+)/chapters$", path)
         if m:
             bid = m.group(1)
-            cp = _chapters_path(bid)
-            if not cp.exists():
+            all_chapters = _get_chapters_parsed(bid)
+            if all_chapters is None:
                 return self.send_error(404)
 
             # 解析查询参数
@@ -235,12 +251,11 @@ class Handler(BaseHTTPRequestHandler):
             start = int(query.get('start', [0])[0])
             limit = int(query.get('limit', [-1])[0])
 
-            # 读取章节数据
-            chapters = json.loads(cp.read_text("utf-8"))
-
             # 切片处理
             if limit > 0:
-                chapters = chapters[start:start + limit]
+                chapters = all_chapters[start:start + limit]
+            else:
+                chapters = all_chapters
 
             # 压缩并返回
             raw = json.dumps(chapters, ensure_ascii=False).encode()

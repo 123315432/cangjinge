@@ -104,7 +104,7 @@ body[data-theme="dream"]::after{opacity:0!important}
 #themeFlash{position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:0;transition:opacity .15s}
 #themeFlash.flash{opacity:1;transition:opacity 0s}
 
-#readerWrap{position:relative;z-index:1;height:100%;overflow-y:auto;padding:60px 40px calc(var(--nav-h) + 30px);scroll-behavior:smooth;-webkit-overflow-scrolling:touch;max-width:900px;margin:0 auto}
+#readerWrap{position:relative;z-index:1;height:100%;overflow-y:auto;padding:60px 40px calc(var(--nav-h) + 30px);scroll-behavior:smooth;-webkit-overflow-scrolling:touch;max-width:750px;margin:0 auto}
 #readerWrap::-webkit-scrollbar{width:4px}
 #readerWrap::-webkit-scrollbar-thumb{background:var(--dim);border-radius:2px}
 
@@ -317,7 +317,7 @@ function loadSettings() {
   } catch(e) {}
 }
 function saveSettings() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...settings, chapterIndex: currentIndex }));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...settings, chapterIndex: currentIndex, scrollPos: wrap ? wrap.scrollTop : 0 }));
 }
 function getWatermarks(bid) {
   try { return JSON.parse(localStorage.getItem(`watermarks_${bid}`)) || []; }
@@ -442,7 +442,9 @@ function renderChapter(animate=true) {
     }, 250);
   } else {
     _fillChapter(ch);
-    wrap.scrollTop = 0;
+    // 恢复上次滚动位置（仅首次加载）
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    wrap.scrollTop = saved.scrollPos || 0;
   }
   catList.querySelectorAll('.cat-item').forEach((el, i) => el.classList.toggle('active', i === currentIndex));
   saveSettings();
@@ -538,6 +540,13 @@ document.addEventListener('keydown', e => {
 
 // ===== Resize =====
 window.addEventListener('resize', () => { initStars(); });
+
+// ===== 滚动位置自动保存 =====
+let scrollTimer = null;
+wrap.addEventListener('scroll', () => {
+  if (scrollTimer) clearTimeout(scrollTimer);
+  scrollTimer = setTimeout(saveSettings, 300);
+}, {passive:true});
 
 // ===== Init =====
 let touchStartX = 0;
