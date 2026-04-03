@@ -183,6 +183,9 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", len(body))
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
         self.wfile.write(body)
 
@@ -199,6 +202,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", mime or "application/octet-stream")
         self.send_header("Content-Length", len(data))
+        self.send_header("Access-Control-Allow-Origin", "*")
         if str(filepath).endswith(".html"):
             self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
         else:
@@ -257,9 +261,8 @@ class Handler(BaseHTTPRequestHandler):
             else:
                 chapters = all_chapters
 
-            # 压缩并返回
+            # 压缩并返回（根据Accept-Encoding决定是否压缩）
             raw = json.dumps(chapters, ensure_ascii=False).encode()
-            gz = gzip.compress(raw, compresslevel=6)
             etag = hashlib.md5(raw).hexdigest()
 
             if self.headers.get("If-None-Match") == etag:
@@ -267,14 +270,26 @@ class Handler(BaseHTTPRequestHandler):
                 self.end_headers()
                 return
 
+            # 检查客户端是否支持gzip
+            accept_encoding = self.headers.get("Accept-Encoding", "")
+            use_gzip = "gzip" in accept_encoding.lower()
+
             self.send_response(200)
             self.send_header("Content-Type", "application/json; charset=utf-8")
-            self.send_header("Content-Encoding", "gzip")
-            self.send_header("Content-Length", len(gz))
             self.send_header("ETag", etag)
             self.send_header("Cache-Control", "public, max-age=3600")
-            self.end_headers()
-            self.wfile.write(gz)
+            self.send_header("Access-Control-Allow-Origin", "*")
+
+            if use_gzip:
+                gz = gzip.compress(raw, compresslevel=6)
+                self.send_header("Content-Encoding", "gzip")
+                self.send_header("Content-Length", len(gz))
+                self.end_headers()
+                self.wfile.write(gz)
+            else:
+                self.send_header("Content-Length", len(raw))
+                self.end_headers()
+                self.wfile.write(raw)
             return
 
         # API: 阅读进度
@@ -326,6 +341,14 @@ class Handler(BaseHTTPRequestHandler):
             return self._serve_file(BASE_DIR / path.lstrip("/"))
 
         self.send_error(404)
+
+    # --- OPTIONS ---
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
 
     # --- POST ---
     def do_POST(self):
