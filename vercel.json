@@ -1,6 +1,4 @@
 {
-  "buildCommand": "python build_static.py",
-  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/read/:id",
