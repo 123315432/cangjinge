@@ -1,0 +1,50 @@
+[
+  {
+    "id": "meiqian_xiuxian",
+    "name": "没钱修什么仙",
+    "author": "AI生成",
+    "cover": "",
+    "description": "都市修仙，900章完结",
+    "chapter_count": 900,
+    "addTime": "2026-03-08T12:00:00",
+    "updateTime": "2026-03-08T12:00:00",
+    "progress": {
+      "chapter": 0,
+      "ts": 1772950464530
+    },
+    "chunk_size": 50,
+    "total_chunks": 18
+  },
+  {
+    "id": "daoyin_cangsheng",
+    "name": "道隐苍生",
+    "author": "AI生成",
+    "cover": "",
+    "description": "修仙长篇，215章",
+    "chapter_count": 215,
+    "addTime": "2026-03-08T20:15:36.197686",
+    "updateTime": "2026-03-08T20:15:36.197686",
+    "progress": {
+      "chapter": 1,
+      "ts": 0
+    },
+    "chunk_size": 50,
+    "total_chunks": 5
+  },
+  {
+    "id": "guke_chunai",
+    "name": "骨科纯爱",
+    "author": "AI生成",
+    "cover": "",
+    "description": "双胞胎兄弟的禁忌之恋",
+    "chapter_count": 120,
+    "addTime": "2026-03-11T13:19:33.427534",
+    "updateTime": "2026-03-11T13:19:33.427534",
+    "progress": {
+      "chapter": 12,
+      "ts": 1775225659224
+    },
+    "chunk_size": 50,
+    "total_chunks": 3
+  }
+]
